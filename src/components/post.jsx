@@ -1,110 +1,25 @@
 import React, { useState } from "react";
+import ReactionButton from "../logic/ReactionButton";
 import ReactionModal from "./ReactionModel";
 import { useUser } from "../userContext";
 
 const Post = ({ content, initialReactions }) => {
   const user = useUser();
-  const [showReactions, setShowReactions] = useState(false);
-  const [hoveringReactions, setHoveringReactions] = useState(false);
   const [reactions, setReactions] = useState(initialReactions || []);
-  const [userReaction, setUserReaction] = useState(
-    reactions.find((r) => r.user.id === user.id) || null
-  );
   const [showModal, setShowModal] = useState(false);
 
-  const handleMouseEnter = () => {
-    if (!userReaction) {
-      setShowReactions(true);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (!hoveringReactions) {
-      setShowReactions(false);
-    }
-  };
-
-  const handleReactionClick = (reaction) => {
-    if (userReaction?.reaction === reaction) {
-      removeReaction();
-    } else {
-      const updatedReactions = reactions.filter((r) => r.user.id !== user.id);
-      setReactions([...updatedReactions, { user, reaction }]);
-      setUserReaction({ user, reaction });
-      setShowReactions(false);
-    }
-  };
-
-  const handleLikeClick = () => {
-    if (userReaction?.reaction === "👍") {
-      removeReaction();
-    } else {
-      handleReactionClick("👍");
-    }
-  };
-
-  const removeReaction = () => {
-    setReactions(reactions.filter((r) => r.user.id !== user.id));
-    setUserReaction(null);
-  };
-
-  const handleReactionsMouseEnter = () => {
-    setHoveringReactions(true);
-  };
-
-  const handleReactionsMouseLeave = () => {
-    setHoveringReactions(false);
-    setShowReactions(false);
+  const handleUpdateReactions = (updatedReactions) => {
+    setReactions(updatedReactions);
   };
 
   return (
     <div className="post">
       <p>{content}</p>
-      <div
-        className="like-button-container"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        <button
-          onClick={handleLikeClick}
-          className={`like-button ${userReaction ? "liked" : ""}`}
-        >
-          {userReaction ? userReaction.reaction : "👍"}
-          {reactions.length > 0 && <span>({reactions.length})</span>}
-        </button>
-        {showReactions && (
-          <div
-            className="reactions"
-            onMouseEnter={handleReactionsMouseEnter}
-            onMouseLeave={handleReactionsMouseLeave}
-          >
-            <span
-              className="reaction-emoji"
-              onClick={() => handleReactionClick("😊")}
-            >
-              😊
-            </span>
-            <span
-              className="reaction-emoji"
-              onClick={() => handleReactionClick("😢")}
-            >
-              😢
-            </span>
-            <span
-              className="reaction-emoji"
-              onClick={() => handleReactionClick("👏")}
-            >
-              👏
-            </span>
-            <span
-              className="reaction-emoji"
-              onClick={() => handleReactionClick("🎉")}
-            >
-              🎉
-            </span>
-          </div>
-        )}
-      </div>
+      <ReactionButton
+        initialReactions={reactions}
+        user={user}
+        onUpdate={handleUpdateReactions}
+      />
       {reactions.length > 0 && (
         <div className="reactions-summary">
           {reactions.length > 2 ? (
